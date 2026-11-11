@@ -18,10 +18,9 @@
     </header>
     <p id="status" class="status" role="status">Conectando…</p>
     <section id="app-content" class="hidden">
-      <section class="card">
+      <section id="create-section" class="card hidden">
         <h2>Nova avaliação</h2>
         <form id="review-form">
-          <label>E-mail de quem avalia<input name="emailAvaliador" type="email" required></label>
           <label>E-mail de quem foi avaliado<input name="emailAvaliado" type="email" required></label>
           <label>Nota (0 a 10)<input name="nota" type="number" min="0" max="10" required></label>
           <label class="wide">Comentário<textarea name="comentarios" maxlength="2000" rows="3" required></textarea></label>

@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const required = ["AUTH0_DOMAIN", "AUTH0_CLIENT_ID", "API_BASE_URL"];
+const required = ["AUTH0_DOMAIN", "AUTH0_CLIENT_ID", "AUTH0_AUDIENCE"];
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length) {
   console.error(`Variáveis obrigatórias ausentes: ${missing.join(", ")}`);
@@ -18,8 +18,8 @@ for (const file of ["index.html", "app.js", "styles.css"]) {
 const config = {
   domain: process.env.AUTH0_DOMAIN,
   clientId: process.env.AUTH0_CLIENT_ID,
-  audience: process.env.AUTH0_AUDIENCE || "",
-  apiBaseUrl: process.env.API_BASE_URL
+  audience: process.env.AUTH0_AUDIENCE,
+  apiBaseUrl: process.env.API_BASE_URL || "/api"
 };
 fs.writeFileSync(
   path.join(output, "auth0-config.js"),

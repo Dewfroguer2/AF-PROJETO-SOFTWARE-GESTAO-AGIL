@@ -3,7 +3,18 @@ const status = document.querySelector("#status");
 const content = document.querySelector("#app-content");
 const loginButton = document.querySelector("#login-button");
 const logoutButton = document.querySelector("#logout-button");
+const createSection = document.querySelector("#create-section");
 let authClient;
+
+function canCreate(token) {
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const permissions = JSON.parse(atob(payload)).permissions;
+    return Array.isArray(permissions) && permissions.includes("create:avaliacoes");
+  } catch {
+    return false;
+  }
+}
 
 function showStatus(message) { status.textContent = message; }
 
@@ -61,13 +72,19 @@ async function updateSession() {
   loginButton.classList.toggle("hidden", loggedIn);
   logoutButton.classList.toggle("hidden", !loggedIn);
   content.classList.toggle("hidden", !loggedIn);
-  if (loggedIn) await loadReviews();
-  else showStatus("Entre para cadastrar e consultar avaliações.");
+  if (loggedIn) {
+    const token = await authClient.getTokenSilently();
+    createSection.classList.toggle("hidden", !canCreate(token));
+    await loadReviews();
+  } else {
+    createSection.classList.add("hidden");
+    showStatus("Entre para consultar avaliações.");
+  }
 }
 
 async function start() {
-  if (!config.domain || !config.clientId || config.domain.includes("SEU_TENANT") || config.clientId.includes("SEU_CLIENT_ID")) {
-    showStatus("Configure o domínio e o Client ID do Auth0 em auth0-config.js.");
+  if (!config.domain || !config.clientId || !config.audience || config.domain.includes("SEU_TENANT") || config.clientId.includes("SEU_CLIENT_ID")) {
+    showStatus("Configure Domain, Client ID e Audience do Auth0 antes de publicar.");
     loginButton.disabled = true;
     return;
   }
@@ -75,7 +92,7 @@ async function start() {
     authClient = await window.auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
-      authorizationParams: { redirect_uri: window.location.origin, ...(config.audience ? { audience: config.audience } : {}) }
+      authorizationParams: { redirect_uri: window.location.origin, audience: config.audience }
     });
     if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
       await authClient.handleRedirectCallback();
